@@ -20,7 +20,10 @@ class Events:
             dtend = component['dtend'].dt
             raw_summary = component['SUMMARY'].split(config.cal_delimeter, 1)
             group = raw_summary[0].lower()
-            summary = raw_summary[1]
+            if len(raw_summary) > 1:
+                summary = raw_summary[1]
+            else:
+                summary = ""
 
             if (dtstart.year == config.year and dtstart.month == config.month):
                 self.list.append(Event(group, summary, dtstart, dtend))

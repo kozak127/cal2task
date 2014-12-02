@@ -17,6 +17,15 @@ class GeneralOutput:
     def process_invalid_events(self, event_list):
         pass
 
+    def generateFilepath(self, case, filetype):
+        directory = config.csv_directory
+        filename = config.filename_pattern
+        filename = filename.replace('%M', str(config.month))
+        filename = filename.replace('%Y', str(config.year))
+        filename = filename.replace('%T', case)
+        filepath = directory + os.sep + filename + filetype
+        return filepath
+
 
 class ConsoleOutput(GeneralOutput):
 
@@ -49,7 +58,7 @@ class CsvOutput(GeneralOutput):
         self.delimeter = config.csv_delimeter
 
     def process_monthly_summaries(self, monthly_summaries):
-        csv_file_path = self.generateFilename('monthly')
+        csv_file_path = self.generateFilepath('monthly', '.csv')
         data = []
         heading = ['GROUP', 'HOURS']
 
@@ -60,7 +69,7 @@ class CsvOutput(GeneralOutput):
         self.csv_writer(heading, data, csv_file_path, self.delimeter)
 
     def process_daily_summaries(self, daily_summaries):
-        csv_file_path = self.generateFilename('daily')
+        csv_file_path = self.generateFilepath('daily', '.csv')
         data = []
 
         heading = ['TOTAL', '###', 'DAY', '###']
@@ -89,7 +98,7 @@ class CsvOutput(GeneralOutput):
         self.csv_writer(heading, data, csv_file_path, self.delimeter)
 
     def process_invalid_events(self, event_list):
-        csv_file_path = self.generateFilename('invalid')
+        csv_file_path = self.generateFilepath('invalid', '.csv')
         data = []
         heading = ['date', 'group', 'summary']
 
@@ -97,12 +106,6 @@ class CsvOutput(GeneralOutput):
             data.append(event.to_plain_list())
 
         self.csv_writer(heading, data, csv_file_path, self.delimeter)
-
-    def generateFilename(self, case):
-        directory = config.csv_directory
-        date = str(config.year) + "_" + str(config.month)
-        filename = directory + os.sep + date + "_" + case + ".csv"
-        return filename
 
     def csv_writer(self, heading, data, path, delimeter):
         with open(path, "wb") as csv_file:

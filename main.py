@@ -1,5 +1,6 @@
 import config
-import domain
+import event
+import raport
 import misc
 import output
 
@@ -7,11 +8,19 @@ import output
 if config.cal_download_file is True:
     misc.download_file(config.cal_url, config.cal_file)
 
+# read data from file
+reader = event.CalFileReader(config.cal_file, config.cal_delimeter)
+events = reader.read_events(config.month, config.year)
+
+# validate data
+validator = event.EventValidator(config.group_dict)
+invalid_events = validator.get_invalid_events(events)
+
 # process data
-events = domain.Events()
-daily_summaries = domain.DailySummaries(events.list)
-monthly_summaries = domain.MonthlySummaries(daily_summaries.list)
-invalid_events = events.get_invalid_events()
+daily_helper = raport.DailyRaportHelper()
+monthly_helper = raport.MonthlyRaportHelper()
+daily_raports = daily_helper.create_raports(events, config.month, config.year)
+monthly_raports = monthly_helper.create_raports(events, config.month)
 
 # prepare output
 out = None
@@ -26,5 +35,5 @@ elif (config.output == 'xml'):
 if invalid_events is not None:
     out.process_invalid_events(invalid_events)
 
-out.process_daily_summaries(daily_summaries)
-out.process_monthly_summaries(monthly_summaries)
+out.process_daily_raports(daily_raports)
+out.process_monthly_raports(monthly_raports)

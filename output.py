@@ -4,14 +4,15 @@ import datetime
 import os
 
 import config
+import raport
 
 
 class GeneralOutput:
 
-    def process_monthly_summaries(self, monthly_summaries):
+    def process_monthly_raports(self, monthly_raports):
         pass
 
-    def process_daily_summaries(self, daily_summaries):
+    def process_daily_raports(self, daily_raports):
         pass
 
     def process_invalid_events(self, event_list):
@@ -29,26 +30,34 @@ class GeneralOutput:
 
 class ConsoleOutput(GeneralOutput):
 
-    def process_monthly_summaries(self, monthly_summaries):
-        print "=== MONTHLY SUMMARIES ==="
-        for summary in monthly_summaries.list:
-            print summary.group + " - " + str(summary.hours)
+    def __init__(self):
+        self.daily_raport_helper = raport.DailyRaportHelper()
+        self.monthly_raport_helper = raport.MonthlyRaportHelper()
+
+    def process_monthly_raports(self, raports):
+        
+        print "=== MONTHLY raports ==="
+        for raport in raports:
+            print raport.to_plain_list('hours')
             print "-----------------"
+        print "~~~ MONTHLY TOTAL ~~~"
+        print self.monthly_raport_helper.get_total_hours(config.month, raports)
 
-    def process_daily_summaries(self, daily_summaries):
-        print "=== DAILY SUMMARIES ==="
-        for summary in daily_summaries.list:
-            if summary.minutes != 0:
-                print str(summary.day) + " - " + summary.group
-                print str(summary.get_duration_in_hours()) + " - " + \
-                    summary.summary
+    def process_daily_raports(self, raports):
+        print "=== DAILY raports ==="
+        for raport in raports:
+            if raport.minutes != 0:
+                print raport.to_plain_list('hours')
                 print "-----------------"
+        print "~~~ DAILY TOTAL ~~~"
+        days = xrange(1, calendar.monthrange(config.year, config.month)[1] + 1)
+        for day in days:
+            print self.daily_raport_helper.get_total_hours(day, raports)
 
-    def process_invalid_events(self, event_list):
+    def process_invalid_events(self, invalid_events):
         print "=== INVALID EVENTS:  ==="
-        for event in event_list:
-            print event.group + " - " + event.summary + \
-                " - " + event.dtstart.strftime('%Y-%m-%d')
+        for event in invalid_events:
+            print event.to_plain_list()
             print "-----------------"
 
 
@@ -57,18 +66,18 @@ class CsvOutput(GeneralOutput):
     def __init__(self):
         self.delimeter = config.csv_delimeter
 
-    def process_monthly_summaries(self, monthly_summaries):
+    def process_monthly_raports(self, monthly_raports):
         csv_file_path = self.generateFilepath('monthly', '.csv')
         data = []
         heading = ['GROUP', 'HOURS']
 
-        for summary in monthly_summaries.list:
+        for summary in monthly_raports.list:
             data.append(summary.to_plain_list())
-        data.append(['TOTAL', str(monthly_summaries.get_hours())])
+        data.append(['TOTAL', str(monthly_raports.get_hours())])
 
         self.csv_writer(heading, data, csv_file_path, self.delimeter)
 
-    def process_daily_summaries(self, daily_summaries):
+    def process_daily_raports(self, daily_raports):
         csv_file_path = self.generateFilepath('daily', '.csv')
         data = []
 
@@ -80,12 +89,12 @@ class CsvOutput(GeneralOutput):
         days = xrange(1, calendar.monthrange(config.year, config.month)[1] + 1)
         for day in days:
             data_row = []
-            data_row.append(str(daily_summaries.get_hours_for_day(day)))
+            data_row.append(str(daily_raports.get_hours_for_day(day)))
             data_row.append('   ')
             data_row.append(str(day))
             data_row.append('   ')
 
-            for summary in daily_summaries.get_summaries_for_day(day):
+            for summary in daily_raports.get_raports_for_day(day):
                 data_row = data_row + summary.to_plain_list()
 
             data.append(data_row)
@@ -97,12 +106,12 @@ class CsvOutput(GeneralOutput):
 
         self.csv_writer(heading, data, csv_file_path, self.delimeter)
 
-    def process_invalid_events(self, event_list):
+    def process_invalid_events(self, invalid_events):
         csv_file_path = self.generateFilepath('invalid', '.csv')
         data = []
         heading = ['date', 'group', 'summary']
 
-        for event in event_list:
+        for event in invalid_events:
             data.append(event.to_plain_list())
 
         self.csv_writer(heading, data, csv_file_path, self.delimeter)

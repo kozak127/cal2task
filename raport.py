@@ -53,7 +53,7 @@ class DailyRaportForGroup(Raport):
         self.summary = self.summary + event.summary + config.summary_delimeter
 
     def to_plain_list(self, interval):
-        return [self.group, str(self.get_duration(interval)), self.summary]
+        return [str(self.get_duration(interval)), self.summary]
 
 
 class DailyRaportHelper:
@@ -67,7 +67,7 @@ class DailyRaportHelper:
                 to_return.append(raport)
         return to_return
 
-    def get_total_hours(self, day, raports):
+    def get_hours(self, day, raports):
         hours = 0.0
         for raport in self.get_raports(day, raports):
             hours = hours + raport.get_duration('hours')
@@ -113,7 +113,7 @@ class MonthlyRaportHelper:
             to_return.append(raport)
         return to_return
 
-    def get_total_hours(self, month, raports):
+    def get_hours(self, month, raports):
         hours = 0.0
         for raport in self.get_raports(month, raports):
             hours = hours + raport.get_duration('hours')

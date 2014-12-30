@@ -9,10 +9,10 @@ import raport
 
 class GeneralOutput:
 
-    def process_monthly_raports(self, monthly_raports):
+    def process_monthly_raports(self, raports):
         pass
 
-    def process_daily_raports(self, daily_raports):
+    def process_daily_raports(self, raports):
         pass
 
     def process_invalid_events(self, event_list):
@@ -31,28 +31,27 @@ class GeneralOutput:
 class ConsoleOutput(GeneralOutput):
 
     def __init__(self):
-        self.daily_raport_helper = raport.DailyRaportHelper()
-        self.monthly_raport_helper = raport.MonthlyRaportHelper()
+        self.daily_helper = raport.DailyRaportHelper()
+        self.monthly_helper = raport.MonthlyRaportHelper()
 
     def process_monthly_raports(self, raports):
-        
         print "=== MONTHLY raports ==="
-        for raport in raports:
-            print raport.to_plain_list('hours')
+        for raport_instance in raports:
+            print raport_instance.to_plain_list('hours')
             print "-----------------"
         print "~~~ MONTHLY TOTAL ~~~"
-        print self.monthly_raport_helper.get_total_hours(config.month, raports)
+        print self.monthly_helper.get_hours(config.month, raports)
 
     def process_daily_raports(self, raports):
         print "=== DAILY raports ==="
-        for raport in raports:
-            if raport.minutes != 0:
-                print raport.to_plain_list('hours')
+        for raport_instance in raports:
+            if raport_instance.minutes != 0:
+                print raport_instance.to_plain_list('hours')
                 print "-----------------"
         print "~~~ DAILY TOTAL ~~~"
         days = xrange(1, calendar.monthrange(config.year, config.month)[1] + 1)
         for day in days:
-            print self.daily_raport_helper.get_total_hours(day, raports)
+            print self.daily_helper.get_hours(day, raports)
 
     def process_invalid_events(self, invalid_events):
         print "=== INVALID EVENTS:  ==="
@@ -65,19 +64,23 @@ class CsvOutput(GeneralOutput):
 
     def __init__(self):
         self.delimeter = config.csv_delimeter
+        self.daily_helper = raport.DailyRaportHelper()
+        self.monthly_helper = raport.MonthlyRaportHelper()
 
-    def process_monthly_raports(self, monthly_raports):
+    def process_monthly_raports(self, raports):
         csv_file_path = self.generateFilepath('monthly', '.csv')
         data = []
         heading = ['GROUP', 'HOURS']
 
-        for summary in monthly_raports.list:
-            data.append(summary.to_plain_list())
-        data.append(['TOTAL', str(monthly_raports.get_hours())])
+        for raport_instance in raports:
+            data.append(raport_instance.to_plain_list('hours'))
+
+        total_hours = str(self.monthly_helper.get_hours(config.month, raports))
+        data.append(['TOTAL', total_hours])
 
         self.csv_writer(heading, data, csv_file_path, self.delimeter)
 
-    def process_daily_raports(self, daily_raports):
+    def process_daily_raports(self, raports):
         csv_file_path = self.generateFilepath('daily', '.csv')
         data = []
 
@@ -89,14 +92,13 @@ class CsvOutput(GeneralOutput):
         days = xrange(1, calendar.monthrange(config.year, config.month)[1] + 1)
         for day in days:
             data_row = []
-            data_row.append(str(daily_raports.get_hours_for_day(day)))
+            data_row.append(str(self.daily_helper.get_hours(day, raports)))
             data_row.append('   ')
             data_row.append(str(day))
             data_row.append('   ')
 
-            for summary in daily_raports.get_raports_for_day(day):
-                data_row = data_row + summary.to_plain_list()
-
+            for raport_instance in self.daily_helper.get_raports(day, raports):
+                data_row = data_row + raport_instance.to_plain_list("hours")
             data.append(data_row)
 
             if config.csv_divide_weeks is True:

@@ -18,8 +18,10 @@ invalid_events = validator.get_invalid_events(events)
 
 # process data
 daily_helper = raport.DailyRaportHelper()
+weekly_helper = raport.WeeklyRaportHelper()
 monthly_helper = raport.MonthlyRaportHelper()
 daily_raports = daily_helper.create_raports(events, config.month, config.year)
+weekly_raports = weekly_helper.create_raports(events, config.month, config.year)
 monthly_raports = monthly_helper.create_raports(events, config.month)
 
 # prepare output
@@ -36,4 +38,5 @@ if invalid_events is not None:
     out.process_invalid_events(invalid_events)
 
 out.process_daily_raports(daily_raports)
+out.process_weekly_raports(weekly_raports)
 out.process_monthly_raports(monthly_raports)

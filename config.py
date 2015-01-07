@@ -2,8 +2,8 @@
 output = 'csv'  # available values: console, csv, none
 summary_delimeter = ', '  # used when combining more summaries into one
 filename_pattern = "hours_%Y%M_%T"  # %Y - year, %M - month, %T - summary type (monthly, daily, invalid). Extension (csv, xls, etc) is added automatically
-month = 12 # month to look in calendar file
-year = 2014 # year to look in calendar file
+month = 12  # month to look in calendar file
+year = 2014  # year to look in calendar file
 
 
 # iCAL options

@@ -1,6 +1,4 @@
-import calendar
 import icalendar
-import math
 
 
 class Event:
@@ -17,6 +15,24 @@ class Event:
 
     def is_group_matching(self, group):
         if (group.find(self.group) > -1):
+            return True
+
+        return False
+
+    def is_day_matching(self, day):
+        if (self.dtstart.day == day):
+            return True
+
+        return False
+
+    def is_week_matching(self, week):
+        if (self.dtstart.isocalendar()[1] == week):
+            return True
+
+        return False
+
+    def is_month_matching(self, month):
+        if (self.dtstart.month == month):
             return True
 
         return False

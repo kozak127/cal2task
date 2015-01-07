@@ -1,7 +1,7 @@
 import calendar
-import math
 
 import config
+import misc
 
 
 class Raport:
@@ -12,9 +12,6 @@ class Raport:
         self.group = group
 
     def populate(self, events):
-        pass
-
-    def add_event(self, event):
         pass
 
     def to_plain_list(self, interval):
@@ -31,6 +28,10 @@ class Raport:
     def remove_trailing_summary_delimeter(self):
         self.summary = self.summary[:-2]
 
+    def add_event(self, event):
+        self.minutes = self.minutes + event.get_duration()
+        self.summary = self.summary + event.summary + config.summary_delimeter
+
 
 class DailyRaportForGroup(Raport):
 
@@ -43,14 +44,10 @@ class DailyRaportForGroup(Raport):
 
     def populate(self, events):
         for event in events:
-            if (event.dtstart.day == self.day and
+            if (event.is_day_matching(self.day) and
                     event.is_group_matching(self.group)):
                 self.add_event(event)
         self.remove_trailing_summary_delimeter()
-
-    def add_event(self, event):
-        self.minutes = self.minutes + event.get_duration()
-        self.summary = self.summary + event.summary + config.summary_delimeter
 
     def to_plain_list(self, interval):
         return [str(self.get_duration(interval)), self.summary]
@@ -81,6 +78,52 @@ class DailyRaportHelper:
         return to_return
 
 
+class WeeklyRaportForGroup(Raport):
+
+    def __init__(self, group, week, events):
+        self.group = group
+        self.week = week
+        self.minutes = 0.0
+        self.summary = ""
+        self.populate(events)
+
+    def populate(self, events):
+        for event in events:
+            if (event.is_week_matching(self.week) and
+                    event.is_group_matching(self.group)):
+                self.add_event(event)
+        self.remove_trailing_summary_delimeter()
+
+    def to_plain_list(self, interval):
+        return [str(self.get_duration(interval)), self.summary]
+
+
+class WeeklyRaportHelper:
+
+    def create_raports(self, events, month, year):
+        to_return = []
+
+        weeks = misc.getWeekNumbersInMonth(month, year)
+        for week in weeks:
+            for group in config.group_dict:
+                raport = WeeklyRaportForGroup(group, week, events)
+                to_return.append(raport)
+        return to_return
+
+    def get_hours(self, week, raports):
+        hours = 0.0
+        for raport in self.get_raports(week, raports):
+            hours = hours + raport.get_duration('hours')
+        return hours
+
+    def get_raports(self, week, raports):
+        to_return = []
+        for raport in raports:
+            if raport.week == week:
+                to_return.append(raport)
+        return to_return
+
+
 class MonthlyRaportForGroup(Raport):
 
     def __init__(self, group, month, events):
@@ -92,13 +135,9 @@ class MonthlyRaportForGroup(Raport):
 
     def populate(self, events):
         for event in events:
-            if (event.dtstart.month == self.month and
+            if (event.is_month_matching(self.month) and
                     event.is_group_matching(self.group)):
                 self.add_event(event)
-
-    def add_event(self, event):
-        self.minutes = self.minutes + event.get_duration()
-        self.summary = self.summary + event.summary + config.summary_delimeter
 
     def to_plain_list(self, interval):
         return [self.group, str(self.get_duration(interval))]

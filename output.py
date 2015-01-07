@@ -5,11 +5,15 @@ import os
 
 import config
 import raport
+import misc
 
 
 class GeneralOutput:
 
     def process_monthly_raports(self, raports):
+        pass
+
+    def process_weekly_raports(self, raports):
         pass
 
     def process_daily_raports(self, raports):
@@ -32,6 +36,7 @@ class ConsoleOutput(GeneralOutput):
 
     def __init__(self):
         self.daily_helper = raport.DailyRaportHelper()
+        self.weekly_helper = raport.WeeklyRaportHelper()
         self.monthly_helper = raport.MonthlyRaportHelper()
 
     def process_monthly_raports(self, raports):
@@ -41,6 +46,18 @@ class ConsoleOutput(GeneralOutput):
             print "-----------------"
         print "~~~ MONTHLY TOTAL ~~~"
         print self.monthly_helper.get_hours(config.month, raports)
+
+    def process_weekly_raports(self, raports):
+        print "=== WEEKLY raports ==="
+        for raport_instance in raports:
+            if raport_instance.minutes != 0:
+                print raport_instance.to_plain_list('hours')
+                print "-----------------"
+        print "~~~ WEEKLY TOTAL ~~~"
+
+        weeks = misc.getWeekNumbersInMonth(config.month, config.year)
+        for week in weeks:
+            print self.weekly_helper.get_hours(week, raports)
 
     def process_daily_raports(self, raports):
         print "=== DAILY raports ==="
@@ -65,6 +82,7 @@ class CsvOutput(GeneralOutput):
     def __init__(self):
         self.delimeter = config.csv_delimeter
         self.daily_helper = raport.DailyRaportHelper()
+        self.weekly_helper = raport.WeeklyRaportHelper()
         self.monthly_helper = raport.MonthlyRaportHelper()
 
     def process_monthly_raports(self, raports):
@@ -77,6 +95,29 @@ class CsvOutput(GeneralOutput):
 
         total_hours = str(self.monthly_helper.get_hours(config.month, raports))
         data.append(['TOTAL', total_hours])
+
+        self.csv_writer(heading, data, csv_file_path, self.delimeter)
+
+    def process_weekly_raports(self, raports):
+        csv_file_path = self.generateFilepath('weekly', '.csv')
+        data = []
+
+        heading = ['TOTAL', '###', 'WEEK', '###']
+        for group in config.group_dict:
+            heading.append('###')
+            heading.append(group.upper())
+
+        weeks = misc.getWeekNumbersInMonth(config.month, config.year)
+        for week in weeks:
+            data_row = []
+            data_row.append(str(self.weekly_helper.get_hours(week, raports)))
+            data_row.append('   ')
+            data_row.append(str(week))
+            data_row.append('   ')
+
+            for raport_instance in self.weekly_helper.get_raports(week, raports):
+                data_row = data_row + raport_instance.to_plain_list("hours")
+            data.append(data_row)
 
         self.csv_writer(heading, data, csv_file_path, self.delimeter)
 

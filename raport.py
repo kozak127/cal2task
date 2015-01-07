@@ -15,7 +15,7 @@ class Raport:
         pass
 
     def to_plain_list(self, interval):
-        pass
+        return [str(self.get_duration(interval)), self.summary]
 
     def get_duration(self, interval):
         if interval == 'hours':
@@ -48,9 +48,6 @@ class DailyRaportForGroup(Raport):
                     event.is_group_matching(self.group)):
                 self.add_event(event)
         self.remove_trailing_summary_delimeter()
-
-    def to_plain_list(self, interval):
-        return [str(self.get_duration(interval)), self.summary]
 
 
 class DailyRaportHelper:
@@ -93,9 +90,6 @@ class WeeklyRaportForGroup(Raport):
                     event.is_group_matching(self.group)):
                 self.add_event(event)
         self.remove_trailing_summary_delimeter()
-
-    def to_plain_list(self, interval):
-        return [str(self.get_duration(interval)), self.summary]
 
 
 class WeeklyRaportHelper:

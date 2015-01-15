@@ -14,8 +14,12 @@ class Event:
         return (duration.seconds) // 60
 
     def is_group_matching(self, group):
-        if (group.find(self.group) > -1):
-            return True
+        subgroups = []
+        subgroups = group.split(',')
+
+        for subgroup in subgroups:
+            if (group.find(self.group) > -1):
+                return True
 
         return False
 

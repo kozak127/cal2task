@@ -7,7 +7,7 @@ def download_file(url, path):
     urllib.urlretrieve(url, path)
 
 
-def getWeekNumbersInMonth(month, year):
+def get_week_numbers_in_month(month, year):
     to_return = []
 
     days = xrange(1, calendar.monthrange(year, month)[1] + 1)

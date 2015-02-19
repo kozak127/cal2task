@@ -1,6 +1,6 @@
 import config
 import event
-import raport
+import report
 import misc
 import output
 
@@ -17,26 +17,26 @@ validator = event.EventValidator(config.group_dict)
 invalid_events = validator.get_invalid_events(events)
 
 # process data
-daily_helper = raport.DailyRaportHelper()
-weekly_helper = raport.WeeklyRaportHelper()
-monthly_helper = raport.MonthlyRaportHelper()
-daily_raports = daily_helper.create_raports(events, config.month, config.year)
-weekly_raports = weekly_helper.create_raports(events, config.month, config.year)
-monthly_raports = monthly_helper.create_raports(events, config.month)
+daily_helper = report.DailyReportHelper()
+weekly_helper = report.WeeklyReportHelper()
+monthly_helper = report.MonthlyReportHelper()
+daily_reports = daily_helper.create_reports(events, config.month, config.year)
+weekly_reports = weekly_helper.create_reports(events, config.month, config.year)
+monthly_reports = monthly_helper.create_reports(events, config.month)
 
 # prepare output
 out = None
-if (config.output == 'console'):
+if config.output == 'console':
     out = output.ConsoleOutput()
-elif (config.output == 'csv'):
+elif config.output == 'csv':
     out = output.CsvOutput()
-elif (config.output == 'xml'):
+elif config.output == 'xml':
     out = output.XmlOutput()
 
 # print data to output
 if invalid_events is not None:
     out.process_invalid_events(invalid_events)
 
-out.process_daily_raports(daily_raports)
-out.process_weekly_raports(weekly_raports)
-out.process_monthly_raports(monthly_raports)
+out.process_daily_reports(daily_reports)
+out.process_weekly_reports(weekly_reports)
+out.process_monthly_reports(monthly_reports)

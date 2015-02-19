@@ -4,7 +4,7 @@ import config
 import misc
 
 
-class Raport:
+class Report:
 
     def __init__(self, group):
         self.minutes = 0.0
@@ -25,7 +25,7 @@ class Raport:
         else:
             return self.minutes
 
-    def remove_trailing_summary_delimeter(self):
+    def remove_trailing_summary_delimiter(self):
         self.summary = self.summary[:-2]
 
     def add_event(self, event):
@@ -33,7 +33,7 @@ class Raport:
         self.summary = self.summary + event.summary + config.summary_delimeter
 
 
-class DailyRaportForGroup(Raport):
+class DailyReportForGroup(Report):
 
     def __init__(self, group, day, events):
         self.group = group
@@ -47,35 +47,35 @@ class DailyRaportForGroup(Raport):
             if (event.is_day_matching(self.day) and
                     event.is_group_matching(self.group)):
                 self.add_event(event)
-        self.remove_trailing_summary_delimeter()
+        self.remove_trailing_summary_delimiter()
 
 
-class DailyRaportHelper:
+class DailyReportHelper:
 
-    def create_raports(self, events, month, year):
+    def create_reports(self, events, month, year):
         to_return = []
         days = xrange(1, calendar.monthrange(year, month)[1] + 1)
         for day in days:
             for group in config.group_dict:
-                raport = DailyRaportForGroup(group, day, events)
-                to_return.append(raport)
+                report = DailyReportForGroup(group, day, events)
+                to_return.append(report)
         return to_return
 
-    def get_hours(self, day, raports):
+    def get_hours(self, day, reports):
         hours = 0.0
-        for raport in self.get_raports(day, raports):
-            hours = hours + raport.get_duration('hours')
+        for report in self.get_reports(day, reports):
+            hours = hours + report.get_duration('hours')
         return hours
 
-    def get_raports(self, day, raports):
+    def get_reports(self, day, reports):
         to_return = []
-        for raport in raports:
-            if raport.day == day:
-                to_return.append(raport)
+        for report in reports:
+            if report.day == day:
+                to_return.append(report)
         return to_return
 
 
-class WeeklyRaportForGroup(Raport):
+class WeeklyReportForGroup(Report):
 
     def __init__(self, group, week, events):
         self.group = group
@@ -89,36 +89,36 @@ class WeeklyRaportForGroup(Raport):
             if (event.is_week_matching(self.week) and
                     event.is_group_matching(self.group)):
                 self.add_event(event)
-        self.remove_trailing_summary_delimeter()
+        self.remove_trailing_summary_delimiter()
 
 
-class WeeklyRaportHelper:
+class WeeklyReportHelper:
 
-    def create_raports(self, events, month, year):
+    def create_reports(self, events, month, year):
         to_return = []
 
-        weeks = misc.getWeekNumbersInMonth(month, year)
+        weeks = misc.get_week_numbers_in_month(month, year)
         for week in weeks:
             for group in config.group_dict:
-                raport = WeeklyRaportForGroup(group, week, events)
-                to_return.append(raport)
+                report = WeeklyReportForGroup(group, week, events)
+                to_return.append(report)
         return to_return
 
-    def get_hours(self, week, raports):
+    def get_hours(self, week, reports):
         hours = 0.0
-        for raport in self.get_raports(week, raports):
-            hours = hours + raport.get_duration('hours')
+        for report in self.get_reports(week, reports):
+            hours = hours + report.get_duration('hours')
         return hours
 
-    def get_raports(self, week, raports):
+    def get_reports(self, week, reports):
         to_return = []
-        for raport in raports:
-            if raport.week == week:
-                to_return.append(raport)
+        for report in reports:
+            if report.week == week:
+                to_return.append(report)
         return to_return
 
 
-class MonthlyRaportForGroup(Raport):
+class MonthlyReportForGroup(Report):
 
     def __init__(self, group, month, events):
         self.group = group
@@ -137,24 +137,24 @@ class MonthlyRaportForGroup(Raport):
         return [self.group, str(self.get_duration(interval))]
 
 
-class MonthlyRaportHelper:
+class MonthlyReportHelper:
 
-    def create_raports(self, events, month):
+    def create_reports(self, events, month):
         to_return = []
         for group in config.group_dict:
-            raport = MonthlyRaportForGroup(group, month, events)
-            to_return.append(raport)
+            report = MonthlyReportForGroup(group, month, events)
+            to_return.append(report)
         return to_return
 
-    def get_hours(self, month, raports):
+    def get_hours(self, month, reports):
         hours = 0.0
-        for raport in self.get_raports(month, raports):
-            hours = hours + raport.get_duration('hours')
+        for report in self.get_reports(month, reports):
+            hours = hours + report.get_duration('hours')
         return hours
 
-    def get_raports(self, month, raports):
+    def get_reports(self, month, reports):
         to_return = []
-        for raport in raports:
-            if raport.month == month:
-                to_return.append(raport)
+        for report in reports:
+            if report.month == month:
+                to_return.append(report)
         return to_return

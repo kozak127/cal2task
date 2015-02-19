@@ -10,34 +10,28 @@ import misc
 
 class GeneralOutput:
 
+    def __init__(self):
+        self.daily_helper = report.DailyReportHelper()
+        self.weekly_helper = report.WeeklyReportHelper()
+        self.monthly_helper = report.MonthlyReportHelper()
+
     def process_monthly_reports(self, reports):
-        pass
+        raise NotImplementedError("process_monthly_reports")
 
     def process_weekly_reports(self, reports):
-        pass
+        raise NotImplementedError("process_weekly_reports")
 
     def process_daily_reports(self, reports):
-        pass
+        raise NotImplementedError("process_daily_reports")
 
     def process_invalid_events(self, event_list):
-        pass
-
-    def generate_filepath(self, case, filetype):
-        directory = config.csv_directory
-        filename = config.filename_pattern
-        filename = filename.replace('%M', str(config.month))
-        filename = filename.replace('%Y', str(config.year))
-        filename = filename.replace('%T', case)
-        filepath = directory + os.sep + filename + filetype
-        return filepath
+        raise NotImplementedError("process_invalid_events")
 
 
 class ConsoleOutput(GeneralOutput):
 
     def __init__(self):
-        self.daily_helper = report.DailyReportHelper()
-        self.weekly_helper = report.WeeklyReportHelper()
-        self.monthly_helper = report.MonthlyReportHelper()
+        GeneralOutput.__init__(self)
 
     def process_monthly_reports(self, reports):
         print "=== MONTHLY reports ==="
@@ -80,10 +74,8 @@ class ConsoleOutput(GeneralOutput):
 class CsvOutput(GeneralOutput):
 
     def __init__(self):
-        self.delimeter = config.csv_delimeter
-        self.daily_helper = report.DailyReportHelper()
-        self.weekly_helper = report.WeeklyReportHelper()
-        self.monthly_helper = report.MonthlyReportHelper()
+        GeneralOutput.__init__(self)
+        self.delimiter = config.csv_delimeter
 
     def process_monthly_reports(self, reports):
         csv_file_path = self.generate_filepath('monthly', '.csv')
@@ -96,7 +88,7 @@ class CsvOutput(GeneralOutput):
         total_hours = str(self.monthly_helper.get_hours(config.month, reports))
         data.append(['TOTAL', total_hours])
 
-        self.csv_writer(heading, data, csv_file_path, self.delimeter)
+        self.csv_writer(heading, data, csv_file_path, self.delimiter)
 
     def process_weekly_reports(self, reports):
         csv_file_path = self.generate_filepath('weekly', '.csv')
@@ -119,7 +111,7 @@ class CsvOutput(GeneralOutput):
                 data_row = data_row + report_instance.to_plain_list("hours")
             data.append(data_row)
 
-        self.csv_writer(heading, data, csv_file_path, self.delimeter)
+        self.csv_writer(heading, data, csv_file_path, self.delimiter)
 
     def process_daily_reports(self, reports):
         csv_file_path = self.generate_filepath('daily', '.csv')
@@ -147,7 +139,7 @@ class CsvOutput(GeneralOutput):
                 if date.strftime("%A") == "Sunday":
                     data.append([''])
 
-        self.csv_writer(heading, data, csv_file_path, self.delimeter)
+        self.csv_writer(heading, data, csv_file_path, self.delimiter)
 
     def process_invalid_events(self, invalid_events):
         csv_file_path = self.generate_filepath('invalid', '.csv')
@@ -157,10 +149,9 @@ class CsvOutput(GeneralOutput):
         for event in invalid_events:
             data.append(event.to_plain_list())
 
-        self.csv_writer(heading, data, csv_file_path, self.delimeter)
+        self.csv_writer(heading, data, csv_file_path, self.delimiter)
 
-    @staticmethod
-    def csv_writer(heading, data, path, delimiter):
+    def csv_writer(self, heading, data, path, delimiter):
         with open(path, "wb") as csv_file:
             writer = csv.writer(csv_file, delimiter=delimiter)
             heading = [s.encode('utf-8') for s in heading]
@@ -168,3 +159,12 @@ class CsvOutput(GeneralOutput):
             for line in data:
                 line = [s.encode('utf-8') for s in line]
                 writer.writerow(line)
+
+    def generate_filepath(self, case, filetype):
+        directory = config.csv_directory
+        filename = config.filename_pattern
+        filename = filename.replace('%M', str(config.month))
+        filename = filename.replace('%Y', str(config.year))
+        filename = filename.replace('%T', case)
+        filepath = directory + os.sep + filename + filetype
+        return filepath

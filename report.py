@@ -12,7 +12,7 @@ class Report:
         self.group = group
 
     def populate(self, events):
-        pass
+        raise NotImplementedError("populate")
 
     def to_plain_list(self, interval):
         return [str(self.get_duration(interval)), self.summary]
@@ -36,10 +36,8 @@ class Report:
 class DailyReportForGroup(Report):
 
     def __init__(self, group, day, events):
-        self.group = group
+        Report.__init__(self, group)
         self.day = day
-        self.minutes = 0.0
-        self.summary = ""
         self.populate(events)
 
     def populate(self, events):
@@ -78,10 +76,8 @@ class DailyReportHelper:
 class WeeklyReportForGroup(Report):
 
     def __init__(self, group, week, events):
-        self.group = group
+        Report.__init__(self, group)
         self.week = week
-        self.minutes = 0.0
-        self.summary = ""
         self.populate(events)
 
     def populate(self, events):
@@ -121,10 +117,8 @@ class WeeklyReportHelper:
 class MonthlyReportForGroup(Report):
 
     def __init__(self, group, month, events):
-        self.group = group
-        self.minutes = 0.0
+        Report.__init__(self, group)
         self.month = month
-        self.summary = ""
         self.populate(events)
 
     def populate(self, events):

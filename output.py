@@ -22,8 +22,7 @@ class GeneralOutput:
     def process_invalid_events(self, event_list):
         pass
 
-    @staticmethod
-    def generate_filepath(case, filetype):
+    def generate_filepath(self, case, filetype):
         directory = config.csv_directory
         filename = config.filename_pattern
         filename = filename.replace('%M', str(config.month))

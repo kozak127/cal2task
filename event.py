@@ -1,5 +1,5 @@
 import icalendar
-
+import config
 
 class Event:
 
@@ -71,6 +71,14 @@ class CalFileReader:
 
         calendar_file.close()
         return events
+
+
+class EventPreparator:
+
+    @staticmethod
+    def prepare_events():
+        if config.group_dict_remove_repeated_projects:
+            config.group_dict = list(set(config.group_dict))
 
 
 class EventValidator:

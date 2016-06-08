@@ -8,6 +8,9 @@ import output
 if config.cal_download_file is True:
     misc.download_file(config.cal_url, config.cal_file)
 
+# preprocessing
+event.EventPreparator.prepare_events()
+
 # read data from file
 reader = event.CalFileReader(config.cal_file, config.cal_delimeter)
 events = reader.read_events(config.month, config.year)

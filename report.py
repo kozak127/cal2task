@@ -19,18 +19,30 @@ class Report:
 
     def get_duration(self, interval):
         if interval == 'hours':
-            return round(self.minutes / 60, 2)
+            return round(self.minutes / 60.0, 2)
         elif interval == 'minutes':
             return self.minutes
         else:
             return self.minutes
 
     def remove_trailing_summary_delimiter(self):
-        self.summary = self.summary[:-2]
+        remove_last = len(config.summary_delimeter)
+        self.summary = self.summary[:-remove_last]
 
     def add_event(self, event):
+        summary = [
+            self.summary,
+            event.summary
+        ]
+        if config.summary_with_time:
+            summary.extend([
+                config.summary_time_delimeter,
+                str(round(event.get_duration() / 60.0, 2))
+            ])
+        summary.append(config.summary_delimeter)
+
         self.minutes = self.minutes + event.get_duration()
-        self.summary = self.summary + event.summary + config.summary_delimeter
+        self.summary = "".join(summary)
 
 
 class DailyReportForGroup(Report):

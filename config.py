@@ -1,6 +1,8 @@
 # GENERAL options
 output = 'csv'  # available values: console, csv, none
 summary_delimeter = ', '  # used when combining more summaries into one
+summary_with_time = True # include time in descriptions
+summary_time_delimeter = ' - ' # used for combining time with descriptions
 filename_pattern = "hours_%Y%M_%T"  # %Y - year, %M - month, %T - summary type (monthly, daily, invalid). Extension (csv, xls, etc) is added automatically
 month = 12  # month to look in calendar file
 year = 2014  # year to look in calendar file

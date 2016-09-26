@@ -3,6 +3,7 @@ output = 'csv'  # available values: console, csv, none
 summary_delimeter = ', '  # used when combining more summaries into one
 summary_with_time = True # include time in descriptions
 summary_time_delimeter = ' - ' # used for combining time with descriptions
+summary_join_similar = False # When on one day there are 2 tasks with the same summary they will apear as one. Time will be added up.
 filename_pattern = "hours_%Y%M_%T"  # %Y - year, %M - month, %T - summary type (monthly, daily, invalid). Extension (csv, xls, etc) is added automatically
 month = 12  # month to look in calendar file
 year = 2014  # year to look in calendar file

@@ -4,18 +4,42 @@ import config
 import misc
 
 
+class ReportItem:
+
+    def __init__(self, *args, **kwargs):
+        self.set_summary(kwargs.get('summary', ''))
+        self.set_time(kwargs.get('time', 0.0))
+
+    def set_summary(self, summary):
+        self.summary = summary
+
+    def set_time(self, time):
+        self.time = float(time)
+
+    def is_summary_equal(self, report):
+        return self.summary == report.summary
+
+    def join(self, report):
+        self.time+=report.time
+
+    def __str__(self):
+        if config.summary_with_time:
+            return config.summary_time_delimeter.join([self.summary, str(round(self.time / 60.0, 2))])
+        return self.summary
+
+
 class Report:
 
     def __init__(self, group):
         self.minutes = 0.0
-        self.summary = ""
+        self.summary = list()
         self.group = group
 
     def populate(self, events):
         raise NotImplementedError("populate")
 
     def to_plain_list(self, interval):
-        return [str(self.get_duration(interval)), self.summary]
+        return [str(self.get_duration(interval)), config.summary_delimeter.join([str(s) for s in self.summary])]
 
     def get_duration(self, interval):
         if interval == 'hours':
@@ -25,24 +49,16 @@ class Report:
         else:
             return self.minutes
 
-    def remove_trailing_summary_delimiter(self):
-        remove_last = len(config.summary_delimeter)
-        self.summary = self.summary[:-remove_last]
-
     def add_event(self, event):
-        summary = [
-            self.summary,
-            event.summary
-        ]
-        if config.summary_with_time:
-            summary.extend([
-                config.summary_time_delimeter,
-                str(round(event.get_duration() / 60.0, 2))
-            ])
-        summary.append(config.summary_delimeter)
-
         self.minutes = self.minutes + event.get_duration()
-        self.summary = "".join(summary)
+        new_report = ReportItem(summary=event.summary, time=event.get_duration())
+        if (config.summary_join_similar):
+            similar = [report for report in self.summary if report.is_summary_equal(new_report)]
+            if (any(similar)):
+                similar[0].join(new_report)
+                return
+        # if do not join similar or no similar was foud
+        self.summary.append(new_report)
 
 
 class DailyReportForGroup(Report):
@@ -57,7 +73,6 @@ class DailyReportForGroup(Report):
             if (event.is_day_matching(self.day) and
                     event.is_group_matching(self.group)):
                 self.add_event(event)
-        self.remove_trailing_summary_delimiter()
 
 
 class DailyReportHelper:
@@ -97,7 +112,6 @@ class WeeklyReportForGroup(Report):
             if (event.is_week_matching(self.week) and
                     event.is_group_matching(self.group)):
                 self.add_event(event)
-        self.remove_trailing_summary_delimiter()
 
 
 class WeeklyReportHelper:

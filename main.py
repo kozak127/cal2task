@@ -4,6 +4,10 @@ import report
 import misc
 import output
 
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
+
 # get file from url
 if config.cal_download_file is True:
     misc.download_file(config.cal_url, config.cal_file)
